@@ -39,7 +39,7 @@ func main() {
 		fmt.Printf("Worke %d sleeping for %d\n", id, n)
 		time.Sleep(time.Duration(n) * time.Second)
 		fmt.Printf("Woker %d done\n", id)
-		//r.Release(token)
+		r.Release(token)
 	}
 	for i := 0; i < 10; i++ {
 		wg.Add(1)
