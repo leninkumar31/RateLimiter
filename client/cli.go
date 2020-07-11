@@ -48,3 +48,36 @@ func NewMaxConcurrencyLimiter(config *models.Config) (limiter.IRateLimiter, erro
 	await()
 	return ratelimiter, nil
 }
+
+// NewFixedWindowRateLimiter :
+func NewFixedWindowRateLimiter(config *models.Config) (limiter.IRateLimiter, error) {
+	if config.FixedInterval == 0 {
+		return nil, errors.New("Fixed Interval should be greater than zero")
+	}
+	if config.Limit == 0 {
+		return nil, errors.New("Limit should be greater than zero")
+	}
+	ratelimiter := limiter.NewRateLimiter(config)
+	fixedWindow := &models.FixedWindowInterval{Interval: config.FixedInterval}
+	makeToken := func() *models.Token {
+		token := models.NewToken()
+		token.ExpiredAt = fixedWindow.EndTime
+		return token
+	}
+	ratelimiter.GenerateToken = makeToken
+	await := func() {
+		go func() {
+			for {
+				select {
+				case <-ratelimiter.Incoming:
+					ratelimiter.CreateToken()
+				case t := <-ratelimiter.ReleaseChan:
+					ratelimiter.ReleaseToken(t)
+				}
+			}
+		}()
+	}
+	fixedWindow.Run(ratelimiter.RunReleaseExpiredTokens)
+	await()
+	return ratelimiter, nil
+}

@@ -15,9 +15,13 @@ func main() {
 	&models.Config{
 		Throttle: 1 * time.Second,
 	})*/
-	r, err := client.NewMaxConcurrencyLimiter(&models.Config{
+	/*r, err := client.NewMaxConcurrencyLimiter(&models.Config{
 		Limit:           2,
 		TokenResetAfter: 10 * time.Second,
+	})*/
+	r, err := client.NewFixedWindowRateLimiter(&models.Config{
+		Limit:         5,
+		FixedInterval: 15 * time.Second,
 	})
 	if err != nil {
 		panic(err)

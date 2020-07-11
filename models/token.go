@@ -13,6 +13,7 @@ type TokenFactory func() *Token
 type Token struct {
 	ID        string
 	CreatedAt time.Time
+	ExpiredAt time.Time
 }
 
 // NewToken :
@@ -24,6 +25,7 @@ func NewToken() *Token {
 	return &Token{
 		ID:        id.String(),
 		CreatedAt: time.Now(),
+		ExpiredAt: time.Time{},
 	}
 }
 
@@ -33,4 +35,10 @@ func (token *Token) NeedReset(resetAfter time.Duration) bool {
 		return true
 	}
 	return false
+}
+
+// IsExpired :
+func (token *Token) IsExpired() bool {
+	currTime := time.Now().UTC()
+	return currTime.After(token.ExpiredAt)
 }

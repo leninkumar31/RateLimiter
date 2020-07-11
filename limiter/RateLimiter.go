@@ -53,9 +53,11 @@ func (ratelimiter *RateLimiter) Acquire() (*models.Token, error) {
 
 // Release :
 func (ratelimiter *RateLimiter) Release(token *models.Token) {
-	go func() {
-		ratelimiter.ReleaseChan <- token
-	}()
+	if token.IsExpired() {
+		go func() {
+			ratelimiter.ReleaseChan <- token
+		}()
+	}
 }
 
 // CreateToken :
@@ -121,4 +123,15 @@ func (ratelimiter *RateLimiter) runResetTokenTask(resetAfter time.Duration) {
 			}
 		}
 	}()
+}
+
+// RunReleaseExpiredTokens :
+func (ratelimiter *RateLimiter) RunReleaseExpiredTokens() {
+	for _, token := range ratelimiter.activeTokens {
+		if token.IsExpired() {
+			go func(token *models.Token) {
+				ratelimiter.ReleaseChan <- token
+			}(token)
+		}
+	}
 }
