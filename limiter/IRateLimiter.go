@@ -5,4 +5,5 @@ import "../models"
 // IRateLimiter :
 type IRateLimiter interface {
 	Acquire() (*models.Token, error)
+	Release(*models.Token)
 }

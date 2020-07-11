@@ -26,3 +26,11 @@ func NewToken() *Token {
 		CreatedAt: time.Now(),
 	}
 }
+
+// NeedReset :
+func (token *Token) NeedReset(resetAfter time.Duration) bool {
+	if time.Since(token.CreatedAt) >= resetAfter {
+		return true
+	}
+	return false
+}

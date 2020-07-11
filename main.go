@@ -11,10 +11,14 @@ import (
 )
 
 func main() {
-	r, err := client.NewThrottleRateLimiter(
-		&models.Config{
-			Throttle: 1 * time.Second,
-		})
+	/*r, err := client.NewThrottleRateLimiter(
+	&models.Config{
+		Throttle: 1 * time.Second,
+	})*/
+	r, err := client.NewMaxConcurrencyLimiter(&models.Config{
+		Limit:           2,
+		TokenResetAfter: 10 * time.Second,
+	})
 	if err != nil {
 		panic(err)
 	}
@@ -31,6 +35,7 @@ func main() {
 		fmt.Printf("Worke %d sleeping for %d\n", id, n)
 		time.Sleep(time.Duration(n) * time.Second)
 		fmt.Printf("Woker %d done\n", id)
+		//r.Release(token)
 	}
 	for i := 0; i < 10; i++ {
 		wg.Add(1)
